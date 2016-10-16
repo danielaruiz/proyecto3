@@ -23,7 +23,7 @@ public class Backend {
         p1.setCreated("29/09/2016");
         p1.setSubreddit("/r/today");
         p1.setIcon(R.mipmap.ic_launcher);
-
+        p1.setUrl("http://www.mgsrvr.com/b7bf42587b2fdf1f453864068962bcbc.bmp");
         mListPostModel.add(p1);
 
         PostModel p2 = new PostModel();
@@ -32,7 +32,7 @@ public class Backend {
         p2.setCreated("29/09/2016");
         p2.setSubreddit("/r/today");
         p2.setIcon(R.mipmap.ic_launcher);
-
+        p2.setUrl("https://laconcurrencia.files.wordpress.com/2008/12/untitled159.jpg");
         mListPostModel.add(p2);
 
         PostModel p3 = new PostModel();
@@ -41,6 +41,7 @@ public class Backend {
         p3.setCreated("29/09/2016");
         p3.setSubreddit("/r/today");
         p3.setIcon(R.mipmap.ic_launcher);
+        p3.setUrl("http://www.spoilersguide.com/media/images/wp-content/uploads/2011/09/house-season-8-promo-poster.bmp");
         mListPostModel.add(p3);
 
         PostModel p4 = new PostModel();
@@ -49,7 +50,7 @@ public class Backend {
         p4.setCreated("29/09/2016");
         p4.setSubreddit("/r/today");
         p4.setIcon(R.mipmap.ic_launcher);
-
+        p4.setUrl("https://www.google.com.ar/intl/en_ALL/images/logos/images_logo_lg.gif");
         mListPostModel.add(p4);
 
         PostModel p5 = new PostModel();
@@ -58,6 +59,7 @@ public class Backend {
         p5.setCreated("29/09/2016");
         p5.setSubreddit("/r/today");
         p5.setIcon(R.mipmap.ic_launcher);
+        p5.setUrl("http://www.mgsrvr.com/b7bf42587b2fdf1f453864068962bcbc.bmp");
         mListPostModel.add(p5);
     }
 

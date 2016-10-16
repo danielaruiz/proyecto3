@@ -8,6 +8,15 @@ public class PostModel {
     private String mCreated;/*creado fecha*/
     private String mAuthor;
     private int icon;
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public int getIcon(){return icon;}
 
