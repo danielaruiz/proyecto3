@@ -5,10 +5,19 @@ public class PostModel {
 
     private String mTitle;/*titulo*/
     private String mSubreddit;/*csubreddit*/
-    private String mCreated;/*creado fecha*/
+    private int mCreated;/*creado fecha*/
     private String mAuthor;
     private int icon;
     private String url;
+    private int comments;
+
+    public int getComments() {
+        return comments;
+    }
+
+    public void setComments(int comments) {
+        this.comments = comments;
+    }
 
     public String getUrl() {
         return url;
@@ -38,11 +47,11 @@ public class PostModel {
         this.mSubreddit = subreddit;
     }
 
-    public String getCreated() {
+    public int getCreated() {
         return mCreated;
     }
 
-    public void setCreated(String created) {
+    public void setCreated(int created) {
         this.mCreated = created;
     }
 
