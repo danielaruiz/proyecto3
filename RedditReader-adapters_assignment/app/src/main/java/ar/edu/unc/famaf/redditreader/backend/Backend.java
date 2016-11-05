@@ -1,11 +1,9 @@
 package ar.edu.unc.famaf.redditreader.backend;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import ar.edu.unc.famaf.redditreader.R;
+import ar.edu.unc.famaf.redditreader.model.Listing;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 public class Backend {
@@ -13,30 +11,22 @@ public class Backend {
     private static Backend ourInstance = new Backend();
     private List<PostModel> mListPostModel=null;
 
-    public static Backend getInstance() {
-        return ourInstance;
-    }
+    public static Backend getInstance() { return ourInstance;    }
 
-    private Backend() {
+    public Backend() {
         mListPostModel = new ArrayList<>();
-        List<PostModel> list=null;
-        String[] urlArray = new String[1];
-        urlArray[0] = this.Url;
-        GetTopPostsTask getTopPostsTask =  new GetTopPostsTask(mListPostModel);
-        mListPostModel= getTopPostsTask.GetTopPosts();
-
-        getTopPostsTask.execute(urlArray);
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (mListPostModel==null){System.out.println("vacio?");}
-
     }
 
-    public List<PostModel> getTopPosts() {
-        return mListPostModel;
+    public void getTopPosts(final TopPostIterator iterator) {
+        new GetTopPostsTask() {
+            @Override
+            protected void onPostExecute(Listing input) {
+                mListPostModel.clear();
+                mListPostModel.addAll(input.getPostModelList());
+                iterator.nextPosts(mListPostModel);
+            }
+        }.execute("https://www.reddit.com/top/.json?limit=50");
+
     }
 
 }

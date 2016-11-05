@@ -66,10 +66,11 @@ public class PostAdapter extends ArrayAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        PostModelHolder holder = null;
+        PostModelHolder holder;
         if (row == null){
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
+
             holder = new PostModelHolder();
             holder.mAuthor = (TextView) row.findViewById(R.id.author);
             holder.mCreated = (TextView) row.findViewById(R.id.created);
@@ -77,40 +78,40 @@ public class PostAdapter extends ArrayAdapter{
             holder.mTitle = (TextView) row.findViewById(R.id.title);
             holder.icon = (ImageView) row.findViewById(R.id.imageView);
             holder.comments =(TextView) row.findViewById(R.id.comment);
+            holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
             row.setTag(holder);
 
         }else{
             holder = (PostModelHolder) row.getTag();
         }
-        System.out.println(String.valueOf(position));
         PostModel model = mListPostModel.get(position);
 
         holder.mTitle.setText(model.getTitle());
         holder.mSubreddit.setText(model.getSubreddit());
-
         holder.mCreated.setText (setTime(String.valueOf(model.getCreated())));
         holder.mAuthor.setText(model.getAuthor());
         holder.icon.setImageResource(model.getIcon());
         holder.comments.setText(String.valueOf(model.getComments()));
-        if(model.getUrl() !=null) {
-            //if(!mBusy){
-            DownloadImageTask downloadImageTask = new DownloadImageTask(holder, row);
-            String url = model.getUrl();
-            URL[] urlArray = new URL[1];
-            try {
-                urlArray[0] = new URL(url);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
 
-            downloadImageTask.execute(urlArray);
-            //}
+        if(model.getUrl() !=null) {
+            if(!mBusy){
+                DownloadImageTask downloadImageTask = new DownloadImageTask(holder);
+                String url = model.getUrl();
+                URL[] urlArray = new URL[1];
+                try {
+                    urlArray[0] = new URL(url);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+                downloadImageTask.execute(urlArray);
+            }
         }
         return row;
     }
 
 
-    public String setTime(String time){
+    private String setTime(String time){
         /*crear hora*/
         String timestamp = String.valueOf(time);
         Date createdOn = new Date(Long.parseLong(timestamp));
@@ -120,7 +121,7 @@ public class PostAdapter extends ArrayAdapter{
         return  String.valueOf(formattedDate);
 
     }
-    //clase holder
+
     static  class  PostModelHolder{
         TextView mTitle;
         TextView mSubreddit;
@@ -128,6 +129,7 @@ public class PostAdapter extends ArrayAdapter{
         TextView mAuthor;
         ImageView icon;
         TextView comments;
+        ProgressBar progressBar;
     }
 
     @Override
@@ -135,34 +137,32 @@ public class PostAdapter extends ArrayAdapter{
         return mListPostModel.isEmpty();
     }
 
-    protected class DownloadImageTask extends AsyncTask<URL, Integer, Bitmap> {
+    private class DownloadImageTask extends AsyncTask<URL, Integer, Bitmap> {
         PostModelHolder holder = null;
-        View row = null;
-        ProgressBar progressBar;
-        public DownloadImageTask(PostModelHolder holder, View row) {/*verrrrrrrr row*/
+
+        public DownloadImageTask(PostModelHolder holder) {
             this.holder = holder;
-            this.row = row;
-            this.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
+
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
+            holder.progressBar.setVisibility(View.VISIBLE);
         }
 
         protected Bitmap doInBackground(URL... urls) {
             URL url = urls[0];
             System.out.println(url);
             Bitmap bitmap = null;
-            InputStream is =null;
-            HttpURLConnection connection = null;
+            InputStream is;
+            HttpURLConnection connection;
             try {
                 connection = (HttpURLConnection) url.openConnection();
                 is = connection.getInputStream();
                 bitmap = BitmapFactory.decodeStream(is, null, null);
             } catch (IOException e) {
-                System.out.println("error descarga");
+                System.out.println("Download Error");
                 e.printStackTrace();
             }
             return bitmap;
@@ -171,21 +171,10 @@ public class PostAdapter extends ArrayAdapter{
         @Override
         protected void onPostExecute(Bitmap result) {
             System.out.println("onPostExecute");
-            if (result!=null) {
+            if (result != null) {
                 holder.icon.setImageBitmap(result);
             }
-            progressBar.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-
-    }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
+            holder.progressBar.setVisibility(View.GONE);
         }
     }
 }

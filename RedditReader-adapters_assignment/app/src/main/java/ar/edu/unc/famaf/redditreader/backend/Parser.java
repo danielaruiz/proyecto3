@@ -1,47 +1,29 @@
 package ar.edu.unc.famaf.redditreader.backend;
 
 import android.util.JsonReader;
-import android.util.JsonToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import ar.edu.unc.famaf.redditreader.R;
+import ar.edu.unc.famaf.redditreader.model.Listing;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 public class Parser {
 
-//    static class Listing{
-//        int after;
-//        int before=null;
-//        List<PostModel> children;
-//    }
-
-    public List<PostModel> readJsonStream(InputStream in) throws IOException {
+    public Listing readJsonStream(InputStream in) throws IOException {
         // Nueva instancia JsonReader
-
-
         JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
         try {
             // Leer Array
-            return ArrayDatos(reader);
+            return ArrayData(reader);
         } finally {
             reader.close();
         }
 
     }
 
-    public List<PostModel> ArrayDatos(JsonReader reader) throws IOException {
-        // Lista temporal
-        List<PostModel> list = new ArrayList<PostModel>();
-
+    public Listing ArrayData(JsonReader reader) throws IOException {
+        Listing list=null;
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
@@ -57,8 +39,8 @@ public class Parser {
 
     }
 
-    List<PostModel> readData(JsonReader reader) throws IOException {
-        List<PostModel> list=null;
+    Listing readData(JsonReader reader) throws IOException {
+        Listing list=null;
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
@@ -73,15 +55,15 @@ public class Parser {
         return list;
     }
 
-    List<PostModel> readChildren(JsonReader reader) throws IOException {
-        List<PostModel> list = new ArrayList<PostModel>();
+    Listing readChildren(JsonReader reader) throws IOException {
+        Listing listing = new Listing();
 
         reader.beginArray();
         while (reader.hasNext()) {
-            list.add(readMessage(reader));
+            listing.add(readMessage(reader));
         }
         reader.endArray();
-        return list;
+        return listing;
 
     }
 
@@ -111,7 +93,7 @@ public class Parser {
                 post.setTitle(reader.nextString());
             } else if (name.equals("subreddit")) {
                 post.setSubreddit(reader.nextString());
-            } else if (name.equals("created") && reader.peek() != JsonToken.NULL) {
+            } else if (name.equals("created") ) {
                 post.setCreated(reader.nextInt());
             } else if (name.equals("author")) {
                 post.setAuthor(reader.nextString());
