@@ -25,7 +25,7 @@ public class Backend {
                 mListPostModel.addAll(input.getPostModelList());
                 iterator.nextPosts(mListPostModel);
             }
-        }.execute("https://www.reddit.com/top/.json?limit=50");
+        }.execute(Url);
 
     }
 

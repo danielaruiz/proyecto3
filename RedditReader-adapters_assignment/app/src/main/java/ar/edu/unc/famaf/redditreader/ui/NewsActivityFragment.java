@@ -2,6 +2,7 @@ package ar.edu.unc.famaf.redditreader.ui;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
@@ -17,6 +18,9 @@ import java.util.List;
 
 import ar.edu.unc.famaf.redditreader.R;
 import ar.edu.unc.famaf.redditreader.backend.Backend;
+import ar.edu.unc.famaf.redditreader.backend.DbLoadTask;
+import ar.edu.unc.famaf.redditreader.backend.DbSaveTask;
+import ar.edu.unc.famaf.redditreader.backend.RedditDBHelper;
 import ar.edu.unc.famaf.redditreader.backend.TopPostIterator;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
@@ -31,53 +35,50 @@ public class NewsActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View context = inflater.inflate(R.layout.fragment_news, container, false);
+        final RedditDBHelper mRedditDb = new RedditDBHelper(getContext());
 
-        if (!isConnected(getContext())){ return context;}
 
-        Backend backend = Backend.getInstance();
+        if (!isConnected(getContext())){
+            //levantar datos de la base de datos
+            //new DbLoadTask().execute(mRedditDb);
+            new DbLoadTask(){
+                @Override
+                protected void onPostExecute(List<PostModel> list1) {
+                    final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list1, mBusy[0]);
+                    final ListView lv = (ListView) getView().findViewById(R.id.list);
+                    lv.setAdapter(adapter);
+                }
+            }.execute(mRedditDb);
+            return context;
+        }else{
+            Backend backend = Backend.getInstance();
+            backend.getTopPosts(new TopPostIterator() {
+                @Override
+                public void nextPosts(List<PostModel> list) {
+                    new DbSaveTask(list){
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            new DbLoadTask(){
+                                @Override
+                                protected void onPostExecute(List<PostModel> list1) {
 
-        backend.getTopPosts(new TopPostIterator() {
-            @Override
-            public void nextPosts(List<PostModel> list) {
-                final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list, mBusy[0]);
-                final ListView lv = (ListView) getView().findViewById(R.id.list);
-                lv.setAdapter(adapter);
-                lv.setOnScrollListener(new AbsListView.OnScrollListener() {
-                    private int currentVisibleitemCount;
-                    private int currentScrollState;
-                    private int currentFirstVisibleItem;
-                    private int totalItem;
-                    private LinearLayout lBelow;
-
-                    @Override
-                    public void onScrollStateChanged(AbsListView view, int scrollState) {
-                        this.currentScrollState = scrollState;
-
-                        switch (scrollState) {
-                            case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
-                                mBusy[0] = false;
-                                adapter.notifyDataSetChanged();
-                                break;
-                            case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-                                mBusy[0] = true;
-                                break;
-                            case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
-                                mBusy[0] = true;
-                                break;
-
+                                    final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list1, mBusy[0]);
+                                    final ListView lv = (ListView) getView().findViewById(R.id.list);
+                                    lv.setAdapter(adapter);
+                                }
+                            }.execute(mRedditDb);
                         }
-                    }
+                    }.execute(mRedditDb);
 
-                    @Override
-                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                        this.currentFirstVisibleItem = firstVisibleItem;
-                        this.currentVisibleitemCount = visibleItemCount;
-                        this.totalItem = totalItemCount;
+//                    final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list1, mBusy[0]);
+//                    final ListView lv = (ListView) getView().findViewById(R.id.list);
+//                    lv.setAdapter(adapter);
 
-                    }
-                });
-            }
-        });
+                }
+            });
+
+        }
 
         return context;
     }
@@ -96,3 +97,39 @@ public class NewsActivityFragment extends Fragment {
         return true;
     }
 }
+
+
+//                lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+//                    private int currentVisibleitemCount;
+//                    private int currentScrollState;
+//                    private int currentFirstVisibleItem;
+//                    private int totalItem;
+//                    private LinearLayout lBelow;
+//
+//                    @Override
+//                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+//                        this.currentScrollState = scrollState;
+//
+//                        switch (scrollState) {
+//                            case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+//                                mBusy[0] = false;
+//                                adapter.notifyDataSetChanged();
+//                                break;
+//                            case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+//                                mBusy[0] = true;
+//                                break;
+//                            case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
+//                                mBusy[0] = true;
+//                                break;
+//
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+//                        this.currentFirstVisibleItem = firstVisibleItem;
+//                        this.currentVisibleitemCount = visibleItemCount;
+//                        this.totalItem = totalItemCount;
+//
+//                    }
+//                });

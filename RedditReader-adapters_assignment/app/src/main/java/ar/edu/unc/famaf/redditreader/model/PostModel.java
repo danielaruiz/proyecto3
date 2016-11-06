@@ -1,6 +1,10 @@
 package ar.edu.unc.famaf.redditreader.model;
 
 
+import android.content.ContentValues;
+
+import ar.edu.unc.famaf.redditreader.backend.RedditDb;
+
 public class PostModel {
 
     private String mTitle;/*titulo*/
@@ -61,5 +65,18 @@ public class PostModel {
 
     public void setAuthor(String author) {
         this.mAuthor = author;
+    }
+
+    public ContentValues toContentValues(){
+        ContentValues values= new ContentValues();
+        //values.put(RedditDb.RedditEntry.ID, id);
+        values.put(RedditDb.RedditEntry.AUTHOR, mAuthor);
+        values.put(RedditDb.RedditEntry.SUBREDDIT, mSubreddit);
+        values.put(RedditDb.RedditEntry.CREATED, mCreated);
+        values.put(RedditDb.RedditEntry.TITLE, mTitle);
+        values.put(RedditDb.RedditEntry.COMMENTS,comments);
+        values.put(RedditDb.RedditEntry.URL, url);
+        //values.put(RedditDb.RedditEntry.ICON, String.valueOf(icon));
+        return  values;
     }
 }
