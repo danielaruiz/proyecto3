@@ -20,7 +20,7 @@ public class Listing {
     }
 
     public List<PostModel> getPostModelList() {
-        return postModelList;
+        return this.postModelList;
     }
 
     public void setPostModelList(List<PostModel> postModelList) {

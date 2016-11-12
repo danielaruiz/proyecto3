@@ -2,18 +2,30 @@ package ar.edu.unc.famaf.redditreader.model;
 
 
 import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.ByteArrayOutputStream;
 
 import ar.edu.unc.famaf.redditreader.backend.RedditDb;
 
 public class PostModel {
-
+    private Integer id;
     private String mTitle;/*titulo*/
     private String mSubreddit;/*csubreddit*/
     private int mCreated;/*creado fecha*/
     private String mAuthor;
-    private int icon;
+    private byte[] icon= new byte[0];
     private String url;
     private int comments;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public int getComments() {
         return comments;
@@ -31,9 +43,13 @@ public class PostModel {
         this.url = url;
     }
 
-    public int getIcon(){return icon;}
+    public byte[] getIcon(){return icon;}
 
-    public void setIcon(int icon){this.icon=icon;}
+    public void setIcon(byte[] icon2){
+        System.out.println("set icon");
+        this.icon= new byte[icon2.length];
+        System.arraycopy(icon2, 0, this.icon,0,icon2.length);
+    }
 
     public String getTitle() {
         return mTitle;
@@ -67,8 +83,30 @@ public class PostModel {
         this.mAuthor = author;
     }
 
+    public static byte[] getBytes(Bitmap bitmap)
+    {
+        byte[] image = new byte[0];
+        try {
+            ByteArrayOutputStream stream=new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG,0, stream);
+            image= stream.toByteArray();
+        }catch (OutOfMemoryError e){
+//            ByteArrayOutputStream stream=new ByteArrayOutputStream();
+//            bitmap.compress(Bitmap.CompressFormat.JPEG,0, stream);
+//            image= stream.toByteArray();
+            e.printStackTrace();
+        }
+
+        return image;
+    }
+    public static Bitmap getImage(byte[] image)
+    {
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
     public ContentValues toContentValues(){
         ContentValues values= new ContentValues();
+        //este valor se setea una vez que se inserta en la base de datos
         //values.put(RedditDb.RedditEntry.ID, id);
         values.put(RedditDb.RedditEntry.AUTHOR, mAuthor);
         values.put(RedditDb.RedditEntry.SUBREDDIT, mSubreddit);
@@ -76,7 +114,9 @@ public class PostModel {
         values.put(RedditDb.RedditEntry.TITLE, mTitle);
         values.put(RedditDb.RedditEntry.COMMENTS,comments);
         values.put(RedditDb.RedditEntry.URL, url);
-        //values.put(RedditDb.RedditEntry.ICON, String.valueOf(icon));
+        if (this.icon.length >0 ){
+            values.put(RedditDb.RedditEntry.ICON, icon);
+        }
         return  values;
     }
 }

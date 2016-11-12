@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -26,24 +28,27 @@ import java.util.Date;
 import java.util.List;
 
 import ar.edu.unc.famaf.redditreader.R;
+import ar.edu.unc.famaf.redditreader.backend.DBAdapter;
+import ar.edu.unc.famaf.redditreader.backend.DbSaveTask;
+import ar.edu.unc.famaf.redditreader.backend.RedditDBHelper;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 /**
  * Created by dvr on 07/10/16.
  */
 
-public class PostAdapter extends ArrayAdapter{
+public class PostAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
     private List<PostModel> mListPostModel;
-    private boolean mBusy;
+    private DBAdapter db;
 
-    public PostAdapter(Context context, int resource, List<PostModel> list, Boolean mBusy) {
+    public PostAdapter(Context context, int resource, List<PostModel> list, DBAdapter db) {
         super(context, resource, list);
         mListPostModel = list;
         this.context = context;
         this.layoutResourceId = resource;
-        this.mBusy=mBusy;
+        this.db = db;
 
     }
 
@@ -66,63 +71,65 @@ public class PostAdapter extends ArrayAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        PostModelHolder holder;
-        if (row == null){
-            LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+        final PostModelHolder holder;
+        if (row == null) {
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new PostModelHolder();
             holder.mAuthor = (TextView) row.findViewById(R.id.author);
             holder.mCreated = (TextView) row.findViewById(R.id.created);
-            holder.mSubreddit =(TextView) row.findViewById(R.id.subreddit);
+            holder.mSubreddit = (TextView) row.findViewById(R.id.subreddit);
             holder.mTitle = (TextView) row.findViewById(R.id.title);
             holder.icon = (ImageView) row.findViewById(R.id.imageView);
-            holder.comments =(TextView) row.findViewById(R.id.comment);
+            holder.comments = (TextView) row.findViewById(R.id.comment);
             holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
             row.setTag(holder);
 
-        }else{
+        } else {
             holder = (PostModelHolder) row.getTag();
         }
-        PostModel model = mListPostModel.get(position);
+        final PostModel model = mListPostModel.get(position);
 
         holder.mTitle.setText(model.getTitle());
         holder.mSubreddit.setText(model.getSubreddit());
-        holder.mCreated.setText (setTime(String.valueOf(model.getCreated())));
+        holder.mCreated.setText(setTime(String.valueOf(model.getCreated())));
         holder.mAuthor.setText(model.getAuthor());
-        holder.icon.setImageResource(model.getIcon());
         holder.comments.setText(String.valueOf(model.getComments()));
+        if (model.getIcon().length > 0) {
+            System.out.println("icon postmodel no vacio" + position);
+            holder.icon.setImageBitmap(model.getImage(model.getIcon()));
+            holder.progressBar.setVisibility(View.GONE);
+            return row;
 
-        if(model.getUrl() !=null) {
-            if(!mBusy){
-                DownloadImageTask downloadImageTask = new DownloadImageTask(holder);
-                String url = model.getUrl();
-                URL[] urlArray = new URL[1];
-                try {
-                    urlArray[0] = new URL(url);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
+        }
+        if (model.getUrl() != null) {
+            DownloadImageTask downloadImageTask = new DownloadImageTask(holder, model);
+            String url = model.getUrl();
+            URL[] urlArray = new URL[1];
+            try {
+                urlArray[0] = new URL(url);
                 downloadImageTask.execute(urlArray);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
         }
         return row;
     }
 
 
-    private String setTime(String time){
+    private String setTime(String time) {
         /*crear hora*/
         String timestamp = String.valueOf(time);
         Date createdOn = new Date(Long.parseLong(timestamp));
         SimpleDateFormat sdf = new SimpleDateFormat("h:mm a");
         String formattedDate = sdf.format(createdOn);
 
-        return  String.valueOf(formattedDate);
+        return String.valueOf(formattedDate);
 
     }
 
-    static  class  PostModelHolder{
+    private class PostModelHolder {
         TextView mTitle;
         TextView mSubreddit;
         TextView mCreated;
@@ -137,11 +144,15 @@ public class PostAdapter extends ArrayAdapter{
         return mListPostModel.isEmpty();
     }
 
+
     private class DownloadImageTask extends AsyncTask<URL, Integer, Bitmap> {
         PostModelHolder holder = null;
+        PostModel model;
 
-        public DownloadImageTask(PostModelHolder holder) {
+
+        public DownloadImageTask(PostModelHolder holder, PostModel model) {
             this.holder = holder;
+            this.model = model;
 
         }
 
@@ -161,10 +172,16 @@ public class PostAdapter extends ArrayAdapter{
                 connection = (HttpURLConnection) url.openConnection();
                 is = connection.getInputStream();
                 bitmap = BitmapFactory.decodeStream(is, null, null);
+                if(bitmap==null){
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
+                }
             } catch (IOException e) {
-                System.out.println("Download Error");
                 e.printStackTrace();
+                bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
             }
+            byte[] image = model.getBytes(bitmap);
+            model.setIcon(image);
+            db.updateimage(model);
             return bitmap;
         }
 

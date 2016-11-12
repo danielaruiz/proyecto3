@@ -1,5 +1,8 @@
 package ar.edu.unc.famaf.redditreader.backend;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.util.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,7 +88,7 @@ public class Parser {
 
     public PostModel readObj(JsonReader reader) throws IOException {
         PostModel post = new PostModel();
-
+        post.setIcon(new byte[0]);
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
@@ -108,7 +111,7 @@ public class Parser {
             }
         }
         reader.endObject();
-        post.setIcon(R.mipmap.ic_launcher);
+
         return post;
     }
 

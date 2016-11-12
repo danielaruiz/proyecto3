@@ -18,11 +18,11 @@ public class GetTopPostsTask extends AsyncTask<String, Integer,Listing> {
     @Override
     protected Listing doInBackground(String... params) {
         String url = params[0];
-        System.out.println("URL: "+url);
+        System.out.println("URL...: "+url);
         HttpURLConnection hcon;
         try {
             hcon=(HttpURLConnection)new URL(url).openConnection();
-            //hcon.setReadTimeout(30000); // Timeout at 30 seconds
+            hcon.setReadTimeout(30000); // Timeout at 30 seconds
             //hcon.setRequestProperty("User-Agent", "Alien V1.0");
             hcon.setRequestMethod("GET");
                 Parser list = new Parser();
