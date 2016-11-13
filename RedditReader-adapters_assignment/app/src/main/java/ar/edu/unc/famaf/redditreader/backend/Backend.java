@@ -19,6 +19,7 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
 public class Backend {
     private static Backend ourInstance = new Backend();
     private List<PostModel> mListPostModel=null;
+    private boolean loadingDB =false;
 
     public static Backend getInstance() { return ourInstance;    }
 
@@ -27,10 +28,11 @@ public class Backend {
     }
 
 
-    public void getTopPosts(Context context, final TopPostIterator iterator){
-        final DBAdapter db= new DBAdapter(context).open();
+    public void getTopPosts(int totalItemsCount, Context context, final TopPostIterator iterator){//debe devolver los primero 5 posts
+        final DBAdapter db= new DBAdapter(context, totalItemsCount).open();
 
-        if (!isConnected(context)){
+        if (!isConnected(context) || loadingDB ){
+            System.out.println("loadingDb");
             new DbLoadTask(){
                 @Override
                 protected void onPostExecute(List<PostModel> list1) {
@@ -51,6 +53,7 @@ public class Backend {
                             @Override
                             protected void onPostExecute(Void aVoid) {
                                 super.onPostExecute(aVoid);
+                                loadingDB=true;
                                 //Cargo desde la base de datos la lista
                                 new DbLoadTask(){
                                     @Override

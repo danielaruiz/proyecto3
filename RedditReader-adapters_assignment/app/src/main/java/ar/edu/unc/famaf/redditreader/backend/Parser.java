@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.util.JsonReader;
+import android.util.JsonToken;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,16 +46,24 @@ public class Parser {
 
     Listing readData(JsonReader reader) throws IOException {
         Listing list=null;
+        String before=null;
+        String after=null;
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
             if (name.equals("children")) {
                 list = readChildren(reader);
-                break;
+                //break;
+            }else if (name.equals("after")){
+                after=reader.nextString();
+            }else if(name.equals("before") && reader.peek()!= JsonToken.NULL){
+                before=reader.nextString();
             } else {
                 reader.skipValue();
             }
         }
+        list.setBefore(before);
+        list.setAfter(after);
         //reader.endObject();
         return list;
     }

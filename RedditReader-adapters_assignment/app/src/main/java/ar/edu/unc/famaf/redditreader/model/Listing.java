@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Listing {
     private List<PostModel> postModelList=new ArrayList<PostModel>();
-    private int before;
-    private int after;
+    private String before;
+    private String after;
 
 
     public void add (PostModel postModel){
@@ -27,19 +27,19 @@ public class Listing {
         this.postModelList = postModelList;
     }
 
-    public int getBefore() {
+    public String getBefore() {
         return before;
     }
 
-    public void setBefore(int before) {
+    public void setBefore(String before) {
         this.before = before;
     }
 
-    public int getAfter() {
+    public String getAfter() {
         return after;
     }
 
-    public void setAfter(int after) {
+    public void setAfter(String after) {
         this.after = after;
     }
 }

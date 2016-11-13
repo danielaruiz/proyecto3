@@ -20,10 +20,15 @@ public class DBAdapter {
     private final Context context;
     private DatabaseHelper DBHelper;
     private SQLiteDatabase db;
+    private int offset;
+    private int limitdb;
+    private  int totalItemsCount;
 
-    public DBAdapter(Context ctx) {
+    public DBAdapter(Context ctx, int totalItemsCount) {
         this.context = ctx;
         this.DBHelper = new DatabaseHelper(context);
+        this.totalItemsCount= totalItemsCount;
+
     }
 
     private class DatabaseHelper extends SQLiteOpenHelper {
@@ -109,11 +114,21 @@ public class DBAdapter {
     public List<PostModel> getAllDb(){
         System.out.println("Recuperando datos de la base");
         List<PostModel> list = new ArrayList<PostModel>();
+        if(totalItemsCount==50){
+            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            offset=0;
+            limitdb=0;
+            return list;
+        }
+        offset=totalItemsCount;
 //        String selectQuery1 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " WHERE id =?";
         String selectQuery= "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME;
+        System.out.println("Recuperando datos de la base offset................................................" + this.offset);
+        String selectQuery2 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " LIMIT 5 OFFSET "+ String.valueOf(this.offset);
+
         //for(int i=1; i<5; i++){
 //        String[] index=new String[]{String.valueOf(10)};
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        Cursor cursor = db.rawQuery(selectQuery2, null);
         if(cursor.moveToFirst()){
             do {
                 PostModel postModel = new PostModel();
@@ -133,6 +148,9 @@ public class DBAdapter {
             } while (cursor.moveToNext());
             cursor.close();
         }
+        //this.offset = this.offset+ 5;
+        System.out.println("despues offset es "+ this.offset);
+        //this.limitdb= this.limitdb+5;
         return list;
     }
 
