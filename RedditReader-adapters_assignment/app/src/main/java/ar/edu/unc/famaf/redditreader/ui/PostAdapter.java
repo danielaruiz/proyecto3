@@ -30,7 +30,7 @@ import java.util.List;
 import ar.edu.unc.famaf.redditreader.R;
 import ar.edu.unc.famaf.redditreader.backend.DBAdapter;
 import ar.edu.unc.famaf.redditreader.backend.DbSaveTask;
-import ar.edu.unc.famaf.redditreader.backend.RedditDBHelper;
+
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 /**
@@ -42,13 +42,15 @@ public class PostAdapter extends ArrayAdapter {
     private int layoutResourceId;
     private List<PostModel> mListPostModel;
     private DBAdapter db;
+    private boolean mbusy;
 
-    public PostAdapter(Context context, int resource, List<PostModel> list, DBAdapter db) {
+    public PostAdapter(Context context, int resource, List<PostModel> list, DBAdapter db, boolean mBusy) {
         super(context, resource, list);
         mListPostModel = list;
         this.context = context;
         this.layoutResourceId = resource;
         this.db = db;
+        this.mbusy=mBusy;
 
     }
 
@@ -97,13 +99,12 @@ public class PostAdapter extends ArrayAdapter {
         holder.mAuthor.setText(model.getAuthor());
         holder.comments.setText(String.valueOf(model.getComments()));
         if (model.getIcon().length > 0) {
-            System.out.println("icon postmodel no vacio" + position);
             holder.icon.setImageBitmap(model.getImage(model.getIcon()));
             holder.progressBar.setVisibility(View.GONE);
             return row;
 
         }
-        if (model.getUrl() != null) {
+        if (model.getUrl() != null && !mbusy && !model.isDownload()) {
             DownloadImageTask downloadImageTask = new DownloadImageTask(holder, model);
             String url = model.getUrl();
             URL[] urlArray = new URL[1];
@@ -160,6 +161,7 @@ public class PostAdapter extends ArrayAdapter {
         protected void onPreExecute() {
             super.onPreExecute();
             holder.progressBar.setVisibility(View.VISIBLE);
+            model.setDownload(true);
         }
 
         protected Bitmap doInBackground(URL... urls) {
@@ -178,6 +180,8 @@ public class PostAdapter extends ArrayAdapter {
             } catch (IOException e) {
                 e.printStackTrace();
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
+            } catch (OutOfMemoryError e){
+                e.printStackTrace();
             }
             byte[] image = model.getBytes(bitmap);
             model.setIcon(image);
@@ -187,7 +191,6 @@ public class PostAdapter extends ArrayAdapter {
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            System.out.println("onPostExecute");
             if (result != null) {
                 holder.icon.setImageBitmap(result);
             }

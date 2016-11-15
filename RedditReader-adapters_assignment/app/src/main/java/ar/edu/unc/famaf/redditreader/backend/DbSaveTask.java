@@ -44,7 +44,6 @@ public class DbSaveTask extends AsyncTask<DBAdapter,Void,Void> {
 
     @Override
     protected Void doInBackground(DBAdapter... dbAdapters) {
-        System.out.println(list.size());
         dbAdapters[0].savePostModel(list);
       return null;
     }

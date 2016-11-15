@@ -14,10 +14,22 @@ import ar.edu.unc.famaf.redditreader.model.Listing;
  */
 
 public class GetTopPostsTask extends AsyncTask<String, Integer,Listing> {
+    private String after;
+    private int offset;
+
+    public GetTopPostsTask(String after, int offset){
+        this.after= after;
+        this.offset=offset;
+    }
 
     @Override
     protected Listing doInBackground(String... params) {
-        String url = params[0];
+        String url;
+        if(after!=null){
+            url= params[0]+"&count="+ String.valueOf(offset)+"&after="+after;
+        }else {
+            url = params[0];
+        }
         System.out.println("URL...: "+url);
         HttpURLConnection hcon;
         try {

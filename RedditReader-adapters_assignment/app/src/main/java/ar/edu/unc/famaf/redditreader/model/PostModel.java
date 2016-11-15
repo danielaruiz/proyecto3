@@ -18,6 +18,15 @@ public class PostModel {
     private byte[] icon= new byte[0];
     private String url;
     private int comments;
+    private boolean download=false;
+
+    public boolean isDownload() {
+        return download;
+    }
+
+    public void setDownload(boolean download) {
+        this.download = download;
+    }
 
     public Integer getId() {
         return id;
@@ -46,7 +55,6 @@ public class PostModel {
     public byte[] getIcon(){return icon;}
 
     public void setIcon(byte[] icon2){
-        System.out.println("set icon");
         this.icon= new byte[icon2.length];
         System.arraycopy(icon2, 0, this.icon,0,icon2.length);
     }
@@ -91,17 +99,21 @@ public class PostModel {
             bitmap.compress(Bitmap.CompressFormat.PNG,0, stream);
             image= stream.toByteArray();
         }catch (OutOfMemoryError e){
-//            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-//            bitmap.compress(Bitmap.CompressFormat.JPEG,0, stream);
-//            image= stream.toByteArray();
+            e.printStackTrace();
+        }catch ( NullPointerException e){
             e.printStackTrace();
         }
 
         return image;
     }
-    public static Bitmap getImage(byte[] image)
-    {
-        return BitmapFactory.decodeByteArray(image, 0, image.length);
+    public static Bitmap getImage(byte[] image){
+        Bitmap b=null;
+        try{
+            b=BitmapFactory.decodeByteArray(image, 0, image.length);
+        }catch (OutOfMemoryError e){
+            e.printStackTrace();
+        }
+        return b;
     }
 
     public ContentValues toContentValues(){

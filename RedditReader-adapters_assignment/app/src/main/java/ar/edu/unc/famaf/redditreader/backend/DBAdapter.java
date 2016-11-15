@@ -21,7 +21,6 @@ public class DBAdapter {
     private DatabaseHelper DBHelper;
     private SQLiteDatabase db;
     private int offset;
-    private int limitdb;
     private  int totalItemsCount;
 
     public DBAdapter(Context ctx, int totalItemsCount) {
@@ -41,7 +40,6 @@ public class DBAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            System.out.println("se creo db");
             try {
                 db.execSQL("CREATE TABLE " + RedditDb.RedditEntry.TABLE_NAME + " ("
                         + RedditDb.RedditEntry.ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -67,7 +65,6 @@ public class DBAdapter {
     }
 
     public DBAdapter open() throws SQLException {
-        System.out.println("open db");
         db = DBHelper.getWritableDatabase();
         return this;
     }
@@ -77,9 +74,11 @@ public class DBAdapter {
         DBHelper.close();
     }
 
+    public void upgrade(){
+        DBHelper.onUpgrade(db,1,2);
+    }
 
     public DBAdapter savePostModel(List<PostModel> list) {
-        DBHelper.onUpgrade(db,1,2);
         db = DBHelper.getWritableDatabase();
         for(int i=0; i<list.size(); i++){
             db.insert(RedditDb.RedditEntry.TABLE_NAME, null,  list.get(i).toContentValues());
@@ -99,58 +98,39 @@ public class DBAdapter {
         if(!db.isOpen()){open();}
         System.out.println("UpdateImage");
         ContentValues values = new ContentValues();
-//        values.put(RedditDb.RedditEntry.ID, postModel.getId());
-//        values.put(RedditDb.RedditEntry.AUTHOR, postModel.getAuthor());
-//        values.put(RedditDb.RedditEntry.SUBREDDIT, postModel.getSubreddit());
-//        values.put(RedditDb.RedditEntry.CREATED, postModel.getCreated());
-//        values.put(RedditDb.RedditEntry.TITLE, postModel.getTitle());
-//        values.put(RedditDb.RedditEntry.COMMENTS, postModel.getComments());
-//        values.put(RedditDb.RedditEntry.URL, postModel.getUrl());
         values.put(RedditDb.RedditEntry.ICON, postModel.getIcon());
         db.update(RedditDb.RedditEntry.TABLE_NAME, values, RedditDb.RedditEntry.ID + "=" + postModel.getId(),null);
         close();
     }
 
     public List<PostModel> getAllDb(){
-        System.out.println("Recuperando datos de la base");
         List<PostModel> list = new ArrayList<PostModel>();
-        if(totalItemsCount==50){
-            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-            offset=0;
-            limitdb=0;
-            return list;
-        }
         offset=totalItemsCount;
-//        String selectQuery1 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " WHERE id =?";
-        String selectQuery= "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME;
-        System.out.println("Recuperando datos de la base offset................................................" + this.offset);
+        System.out.println("Recuperando datos de la base offset...................." + this.offset);
         String selectQuery2 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " LIMIT 5 OFFSET "+ String.valueOf(this.offset);
-
-        //for(int i=1; i<5; i++){
-//        String[] index=new String[]{String.valueOf(10)};
-        Cursor cursor = db.rawQuery(selectQuery2, null);
-        if(cursor.moveToFirst()){
-            do {
-                PostModel postModel = new PostModel();
-                System.out.println(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.ID)));
-                postModel.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.ID))));
-                postModel.setAuthor(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.AUTHOR)));
-                postModel.setTitle(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.TITLE)));
-                postModel.setSubreddit(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.SUBREDDIT)));
-                postModel.setComments(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.COMMENTS))));
-                postModel.setCreated(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.CREATED))));
-                postModel.setUrl(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.URL)));
-                byte[] image = cursor.getBlob(cursor.getColumnIndex(RedditDb.RedditEntry.ICON));
-                if (image != null) {
-                    postModel.setIcon(image);
-                }
-                list.add(postModel);
-            } while (cursor.moveToNext());
-            cursor.close();
+        try {
+            Cursor cursor = db.rawQuery(selectQuery2, null);
+            if(cursor.moveToFirst()) {
+                do {
+                    PostModel postModel = new PostModel();
+                    postModel.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.ID))));
+                    postModel.setAuthor(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.AUTHOR)));
+                    postModel.setTitle(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.TITLE)));
+                    postModel.setSubreddit(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.SUBREDDIT)));
+                    postModel.setComments(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.COMMENTS))));
+                    postModel.setCreated(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.CREATED))));
+                    postModel.setUrl(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.URL)));
+                    byte[] image = cursor.getBlob(cursor.getColumnIndex(RedditDb.RedditEntry.ICON));
+                    if (image != null) {
+                        postModel.setIcon(image);
+                    }
+                    list.add(postModel);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+        }catch (IllegalStateException e){
+                e.printStackTrace();
         }
-        //this.offset = this.offset+ 5;
-        System.out.println("despues offset es "+ this.offset);
-        //this.limitdb= this.limitdb+5;
         return list;
     }
 

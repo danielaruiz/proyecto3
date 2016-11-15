@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -27,36 +28,60 @@ public class NewsActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View context = inflater.inflate(R.layout.fragment_news, container, false);
         final List<PostModel> list= new ArrayList<>();
         final Backend backend = Backend.getInstance();
+        final boolean[] mBusy = new boolean[1];
+
         backend.getTopPosts(0,getContext(), new TopPostIterator() {
             @Override
             public void nextPosts(List<PostModel> lst, DBAdapter db) {
                 list.addAll(lst);
-                final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list, db);
+                final PostAdapter adapter = new PostAdapter(getActivity(), R.layout.listview_row, list, db, mBusy[0]);
                 final ListView lv = (ListView) getView().findViewById(R.id.list);
                 lv.setAdapter(adapter);
+
                 lv.setOnScrollListener(new EndlessScrollListener() {
+                    private int currentScrollState;
                     @Override
                     public boolean onLoadMore(int page, int totalItemsCount) {
                         System.out.println("on load more");
                         // Triggered only when new data needs to be appended to the list
                         // Add whatever code is needed to append new items to your AdapterView
                         //loadNextDataFromApi(page);
+                        System.out.println("totalItemCount"+totalItemsCount);
                         backend.getTopPosts(totalItemsCount, getContext(), new TopPostIterator() {
                             @Override
                             public void nextPosts(List<PostModel> lst, DBAdapter db) {
-                                //list.clear();
                                 list.addAll(lst);
                                 adapter.notifyDataSetChanged();
-
                             }
                         });
-
                         // or loadNextDataFromApi(totalItemsCount);
                         return true; // ONLY if more data is actually being loaded; false otherwise.
                     }
+
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+                        super.onScrollStateChanged(view, scrollState);
+                        this.currentScrollState = scrollState;
+
+                        switch (scrollState) {
+                            case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+                                mBusy[0] = false;
+                                adapter.notifyDataSetChanged();
+                                break;
+                            case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+                                mBusy[0] = true;
+                                break;
+                            case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
+                                mBusy[0] = true;
+                                break;
+
+                        }
+                    }
+
                 });
 
 
@@ -76,40 +101,3 @@ public class NewsActivityFragment extends Fragment {
         //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
     }
 }
-
-
-
-//                lv.setOnScrollListener(new AbsListView.OnScrollListener() {
-//                    private int currentVisibleitemCount;
-//                    private int currentScrollState;
-//                    private int currentFirstVisibleItem;
-//                    private int totalItem;
-//                    private LinearLayout lBelow;
-//
-//                    @Override
-//                    public void onScrollStateChanged(AbsListView view, int scrollState) {
-//                        this.currentScrollState = scrollState;
-//
-//                        switch (scrollState) {
-//                            case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
-//                                mBusy[0] = false;
-//                                adapter.notifyDataSetChanged();
-//                                break;
-//                            case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-//                                mBusy[0] = true;
-//                                break;
-//                            case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
-//                                mBusy[0] = true;
-//                                break;
-//
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-//                        this.currentFirstVisibleItem = firstVisibleItem;
-//                        this.currentVisibleitemCount = visibleItemCount;
-//                        this.totalItem = totalItemCount;
-//
-//                    }
-//                });
