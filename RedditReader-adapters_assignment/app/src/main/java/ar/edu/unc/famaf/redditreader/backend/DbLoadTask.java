@@ -7,23 +7,6 @@ import java.util.List;
 
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
-/**
- * Created by dvr on 05/11/16.
- */
-
-//public class DbLoadTask extends AsyncTask<RedditDBHelper,Void,List<PostModel>>{
-//    @Override
-//    protected List<PostModel> doInBackground(RedditDBHelper... db) {
-//        return db[0].getAllDb();
-//    }
-//
-//    @Override
-//    protected void onPostExecute(List<PostModel> list1){
-//        super.onPostExecute(list1);
-//    }
-//}
-
-
 public class DbLoadTask extends AsyncTask<DBAdapter,Void,List<PostModel>>{
     @Override
     protected List<PostModel> doInBackground(DBAdapter... dbAdapters) {

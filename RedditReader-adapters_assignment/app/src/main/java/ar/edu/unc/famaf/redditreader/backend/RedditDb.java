@@ -16,6 +16,7 @@ public class RedditDb {
         public static final String COMMENTS="comments";
         public static final String CREATED="mCreated";
         public static final String URL="url";
+        public static final String THUMBNAIL="thumbnail";
         public static  final String ICON = "icon";
         /*agregar en postmodel id*/
     }

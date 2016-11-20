@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.widget.Switch;
 
 
 import java.util.ArrayList;
@@ -62,11 +63,11 @@ public class Backend {
             new GetTopPostsTask(null,0) {
                 @Override
                 protected void onPostExecute(Listing input) {
-                    list= input.getPostModelList();
+                    list= input.getPostModelList();// java.lang.NullPointerException:
                     after=input.getAfter();
                     before=input.getBefore();
 
-                    if(list!=null) {
+                    if(list.size()!=0) {
                         db.upgrade();
                         new DbSaveTask(list) {
                             @Override
@@ -119,6 +120,7 @@ public class Backend {
             }
         }
     }
+
 
     private boolean isConnected(Context context) {
         ConnectivityManager conMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);

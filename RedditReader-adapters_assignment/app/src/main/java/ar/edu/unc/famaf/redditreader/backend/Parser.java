@@ -110,7 +110,7 @@ public class Parser {
                     post.setSubreddit(reader.nextString());
                     break;
                 case "created":
-                    post.setCreated(reader.nextInt());
+                    post.setCreated(reader.nextLong());
                     break;
                 case "author":
                     post.setAuthor(reader.nextString());
@@ -120,6 +120,9 @@ public class Parser {
                     break;
                 case "num_comments":
                     post.setComments(reader.nextInt());
+                    break;
+                case "thumbnail":
+                    post.setThumbnail(reader.nextString());
                     break;
                 default:
                     reader.skipValue();

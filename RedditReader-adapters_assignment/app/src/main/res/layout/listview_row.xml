@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="3dp">
+    android:id="@+id/listview_row">
 
 
     <!--android:layout_alignLeft="@id/imageView"-->
 
 
-    <TextView
-        android:text="r/today"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/subreddit"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/title"
-        android:layout_marginTop="1dp"
-        android:layout_marginBottom="1dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
-        />
     <!--android:layout_toRightOf="@id/author"-->
 
     <TextView
@@ -31,7 +20,8 @@
         android:id="@+id/created"
         android:layout_alignTop="@+id/subreddit"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:textColor="@android:color/darker_gray" />
     <ImageView
         android:layout_width="70dp"
         app:srcCompat="@mipmap/ic_launcher"
@@ -55,7 +45,7 @@
 
 
     <TextView
-        android:text="tiluto de algo ghjghghjg ghhjghj ghj ghj ghj ghj ghj ghjghjghjg hjg hj gh"
+        android:text="texto"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:id="@+id/title"
@@ -68,7 +58,8 @@
         android:layout_toStartOf="@+id/imageView3"
         android:layout_toLeftOf="@+id/imageView3"
         android:layout_marginRight="15dp"
-        android:layout_marginLeft="80dp" />
+        android:layout_marginLeft="80dp"
+        android:textColor="@android:color/background_dark" />
 
 
     <ProgressBar
@@ -105,7 +96,8 @@
         android:layout_alignRight="@+id/imageView3"
         android:layout_alignEnd="@+id/imageView3"
         android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView" />
+        android:layout_toEndOf="@+id/imageView"
+        android:textColor="@android:color/darker_gray" />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -118,14 +110,23 @@
         android:layout_below="@+id/subreddit" />
 
     <TextView
+        android:text="r/today"
+        android:layout_height="wrap_content"
+        android:id="@+id/subreddit"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/created"
+        android:layout_width="150dp"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <TextView
         android:text="author "
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/author"
-        android:layout_alignBaseline="@+id/subreddit"
-        android:layout_alignBottom="@+id/subreddit"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_width="170dp"
+        android:textColor="@android:color/darker_gray" />
 
 
 </RelativeLayout>

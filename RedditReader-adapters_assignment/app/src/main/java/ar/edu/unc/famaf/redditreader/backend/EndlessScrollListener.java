@@ -9,7 +9,7 @@ import android.widget.AbsListView;
 public abstract class EndlessScrollListener implements AbsListView.OnScrollListener {
     // The minimum number of items to have below your current scroll position
     // before loading more.
-    private int visibleThreshold = 5;
+    private int visibleThreshold =5;
     // The current offset index of data you have loaded
     private int currentPage = 0;
     // The total number of items in the dataset after the last load
@@ -41,9 +41,15 @@ public abstract class EndlessScrollListener implements AbsListView.OnScrollListe
     {
         // If the total item count is zero and the previous isn't, assume the
         // list is invalidated and should be reset back to initial state
+//        System.out.println(firstVisibleItem);
+//        System.out.println(visibleItemCount);
+//        System.out.println(totalItemCount);
+
+
+
         if (totalItemCount < previousTotalItemCount) {
             this.currentPage = this.startingPageIndex;
-            this.previousTotalItemCount = totalItemCount;//ESTO LE CAMBIE (-1)
+            this.previousTotalItemCount = totalItemCount;
             if (totalItemCount == 0) { this.loading = true; }
         }
         // If it's still loading, we check to see if the dataset count has
@@ -60,7 +66,13 @@ public abstract class EndlessScrollListener implements AbsListView.OnScrollListe
         if (!loading && (firstVisibleItem + visibleItemCount + visibleThreshold) >= totalItemCount ) {
             loading = onLoadMore(currentPage + 1, totalItemCount);
         }
+
+//        if ((firstVisibleItem==0) && (totalItemCount==50)){
+//            System.out.println("CARGAR BEFORE");
+//            loading = onLoadMoreBefore(totalItemCount);
+//        }
     }
+    //public abstract boolean onLoadMoreBefore(int totalItemsCount);
     // Defines the process for actually loading more data based on page
     // Returns true if more data is being loaded; returns false if there is no more data to load.
     public abstract boolean onLoadMore(int page, int totalItemsCount);

@@ -1,5 +1,7 @@
 package ar.edu.unc.famaf.redditreader.ui;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -7,11 +9,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
-
 import ar.edu.unc.famaf.redditreader.R;
+import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 
-public class NewsActivity extends AppCompatActivity {
+public class NewsActivity extends AppCompatActivity implements OnPostItemSelectedListener{
+    static final int REQUEST =0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,8 +23,8 @@ public class NewsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_news);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-    }
 
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -31,13 +35,39 @@ public class NewsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_sign_in) {
             TextView textView = (TextView) findViewById(R.id.loginStatusTextView);
             textView.setText("");
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onPostItemPicked(PostModel post) {
+        Context context= getApplicationContext();
+        if(post!=null) {
+            Intent intent = new Intent(context, NewsDetailActivity.class);
+            intent.putExtra("subreddit", post.getSubreddit());
+            intent.putExtra("creado", String.valueOf(post.getCreated()));
+            intent.putExtra("titulo", post.getTitle());
+            intent.putExtra("autor", post.getAuthor());
+            intent.putExtra("preview",post.getIcon());
+            intent.putExtra("url", post.getUrl());
+            startActivityForResult(intent, REQUEST);
+        }
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+//        if (requestCode == REQUEST){}
+//        +            if (resultCode == RESULT_OK) {
+//        +                String usuario = data.getExtras().getString("user");
+//        +                TextView textView = (TextView) findViewById(R.id.loginStatusTextView);
+//        +                textView.setText(usuario);
+//        +            }
+//        +        }
+    }
+
 }

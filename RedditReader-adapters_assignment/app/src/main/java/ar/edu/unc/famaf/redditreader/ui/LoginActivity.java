@@ -213,6 +213,9 @@ public class LoginActivity extends AppCompatActivity  {
             showProgress(false);
 
             if (success) {
+//                +                Intent i = getIntent();
+//                +                i.putExtra("user", mEmail);
+//                +                setResult(RESULT_OK, i);
                 finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
