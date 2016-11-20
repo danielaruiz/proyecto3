@@ -6,19 +6,29 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 
 import ar.edu.unc.famaf.redditreader.backend.RedditDb;
 
-public class PostModel {
+public class PostModel implements Serializable {
     private Integer id;
     private String mTitle;/*titulo*/
     private String mSubreddit;/*csubreddit*/
-    private int mCreated;/*creado fecha*/
+    private long mCreated;/*creado fecha*/
     private String mAuthor;
     private byte[] icon= new byte[0];
+    private String thumbnail;
     private String url;
     private int comments;
     private boolean download=false;
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
     public boolean isDownload() {
         return download;
@@ -55,8 +65,9 @@ public class PostModel {
     public byte[] getIcon(){return icon;}
 
     public void setIcon(byte[] icon2){
-        this.icon= new byte[icon2.length];
-        System.arraycopy(icon2, 0, this.icon,0,icon2.length);
+        this.icon=icon2;
+//        this.icon= new byte[icon2.length];
+//        System.arraycopy(icon2, 0, this.icon,0,icon2.length);
     }
 
     public String getTitle() {
@@ -75,11 +86,11 @@ public class PostModel {
         this.mSubreddit = subreddit;
     }
 
-    public int getCreated() {
+    public long getCreated() {
         return mCreated;
     }
 
-    public void setCreated(int created) {
+    public void setCreated(long created) {
         this.mCreated = created;
     }
 
@@ -91,30 +102,6 @@ public class PostModel {
         this.mAuthor = author;
     }
 
-    public static byte[] getBytes(Bitmap bitmap)
-    {
-        byte[] image = new byte[0];
-        try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG,0, stream);
-            image= stream.toByteArray();
-        }catch (OutOfMemoryError e){
-            e.printStackTrace();
-        }catch ( NullPointerException e){
-            e.printStackTrace();
-        }
-
-        return image;
-    }
-    public static Bitmap getImage(byte[] image){
-        Bitmap b=null;
-        try{
-            b=BitmapFactory.decodeByteArray(image, 0, image.length);
-        }catch (OutOfMemoryError e){
-            e.printStackTrace();
-        }
-        return b;
-    }
 
     public ContentValues toContentValues(){
         ContentValues values= new ContentValues();
@@ -126,6 +113,7 @@ public class PostModel {
         values.put(RedditDb.RedditEntry.TITLE, mTitle);
         values.put(RedditDb.RedditEntry.COMMENTS,comments);
         values.put(RedditDb.RedditEntry.URL, url);
+        values.put(RedditDb.RedditEntry.THUMBNAIL, thumbnail);
         if (this.icon.length >0 ){
             values.put(RedditDb.RedditEntry.ICON, icon);
         }

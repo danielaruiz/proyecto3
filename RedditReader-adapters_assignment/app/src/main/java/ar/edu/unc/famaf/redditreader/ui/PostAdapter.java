@@ -1,3 +1,4 @@
+
 package ar.edu.unc.famaf.redditreader.ui;
 
 import android.app.Activity;
@@ -7,7 +8,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.Layout;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -29,13 +30,10 @@ import java.util.List;
 
 import ar.edu.unc.famaf.redditreader.R;
 import ar.edu.unc.famaf.redditreader.backend.DBAdapter;
-import ar.edu.unc.famaf.redditreader.backend.DbSaveTask;
+
 
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
-/**
- * Created by dvr on 07/10/16.
- */
 
 public class PostAdapter extends ArrayAdapter {
     private Context context;
@@ -43,6 +41,7 @@ public class PostAdapter extends ArrayAdapter {
     private List<PostModel> mListPostModel;
     private DBAdapter db;
     private boolean mbusy;
+    private Bitmap bitmapdefault;
 
     public PostAdapter(Context context, int resource, List<PostModel> list, DBAdapter db, boolean mBusy) {
         super(context, resource, list);
@@ -51,12 +50,8 @@ public class PostAdapter extends ArrayAdapter {
         this.layoutResourceId = resource;
         this.db = db;
         this.mbusy=mBusy;
+        bitmapdefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.error);
 
-    }
-
-    @Override
-    public int getCount() {
-        return mListPostModel.size();
     }
 
     @Nullable
@@ -65,19 +60,14 @@ public class PostAdapter extends ArrayAdapter {
         return mListPostModel.get(position);
     }
 
-    public int getPosition(PostModel item) {
-        return mListPostModel.indexOf(item);
-    }
-
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         View row = convertView;
         final PostModelHolder holder;
-        if (row == null) {
+        if (row == null || !(row.getTag() instanceof PostModelHolder)) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
-
             holder = new PostModelHolder();
             holder.mAuthor = (TextView) row.findViewById(R.id.author);
             holder.mCreated = (TextView) row.findViewById(R.id.created);
@@ -86,48 +76,58 @@ public class PostAdapter extends ArrayAdapter {
             holder.icon = (ImageView) row.findViewById(R.id.imageView);
             holder.comments = (TextView) row.findViewById(R.id.comment);
             holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
+            //holder.position = position;
             row.setTag(holder);
-
-        } else {
+        }else{
             holder = (PostModelHolder) row.getTag();
         }
-        final PostModel model = mListPostModel.get(position);
 
+        PostModel model = getItem(position);
         holder.mTitle.setText(model.getTitle());
         holder.mSubreddit.setText(model.getSubreddit());
-        holder.mCreated.setText(setTime(String.valueOf(model.getCreated())));
+        holder.mCreated.setText(setTime(model.getCreated()));
         holder.mAuthor.setText(model.getAuthor());
         holder.comments.setText(String.valueOf(model.getComments()));
+        holder.position= position;
+
         if (model.getIcon().length > 0) {
-            holder.icon.setImageBitmap(model.getImage(model.getIcon()));
+            holder.icon.setImageBitmap(getImage(model.getIcon()));
             holder.progressBar.setVisibility(View.GONE);
             return row;
-
         }
-        if (model.getUrl() != null && !mbusy && !model.isDownload()) {
-            DownloadImageTask downloadImageTask = new DownloadImageTask(holder, model);
-            String url = model.getUrl();
-            URL[] urlArray = new URL[1];
+        //caso contrario descargamos imagen si existe url
+        if (model.getThumbnail() != null && !mbusy && !model.isDownload()) {
             try {
-                urlArray[0] = new URL(url);
-                downloadImageTask.execute(urlArray);
+                URL urlArray = new URL(model.getThumbnail());
+                //Descargando imagen
+                new DownloadImageTask(model){
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+                        holder.progressBar.setVisibility(View.VISIBLE);
+                        model.setDownload(true);
+                    }
+                    @Override
+                    protected void onPostExecute(Bitmap result) {
+                        super.onPostExecute(result);
+                        if(holder.position==position ){
+                            holder.icon.setImageBitmap(result);
+                            holder.progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                }.execute(urlArray);
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                holder.icon.setImageBitmap(bitmapdefault);
+                holder.progressBar.setVisibility(View.GONE);
             }
+
+        } else if (model.getThumbnail()==null){
+            holder.icon.setImageBitmap(bitmapdefault);
+            holder.progressBar.setVisibility(View.GONE);
         }
         return row;
-    }
-
-
-    private String setTime(String time) {
-        /*crear hora*/
-        String timestamp = String.valueOf(time);
-        Date createdOn = new Date(Long.parseLong(timestamp));
-        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a");
-        String formattedDate = sdf.format(createdOn);
-
-        return String.valueOf(formattedDate);
-
     }
 
     private class PostModelHolder {
@@ -138,63 +138,67 @@ public class PostAdapter extends ArrayAdapter {
         ImageView icon;
         TextView comments;
         ProgressBar progressBar;
+        int position;
     }
-
-    @Override
-    public boolean isEmpty() {
-        return mListPostModel.isEmpty();
-    }
-
 
     private class DownloadImageTask extends AsyncTask<URL, Integer, Bitmap> {
-        PostModelHolder holder = null;
         PostModel model;
 
-
-        public DownloadImageTask(PostModelHolder holder, PostModel model) {
-            this.holder = holder;
+        private DownloadImageTask(PostModel model) {
             this.model = model;
-
         }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            holder.progressBar.setVisibility(View.VISIBLE);
-            model.setDownload(true);
-        }
-
         protected Bitmap doInBackground(URL... urls) {
             URL url = urls[0];
-            System.out.println(url);
+            //System.out.println(url);
             Bitmap bitmap = null;
-            InputStream is;
-            HttpURLConnection connection;
             try {
-                connection = (HttpURLConnection) url.openConnection();
-                is = connection.getInputStream();
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                InputStream is = connection.getInputStream();
                 bitmap = BitmapFactory.decodeStream(is, null, null);
-                if(bitmap==null){
-                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
-                }
             } catch (IOException e) {
                 e.printStackTrace();
-                bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
-            } catch (OutOfMemoryError e){
-                e.printStackTrace();
             }
-            byte[] image = model.getBytes(bitmap);
-            model.setIcon(image);
-            db.updateimage(model);
+            if(bitmap!=null){
+                model.setIcon(getBytes(bitmap));
+                db.updateimage(model);
+                return bitmap;
+            }
+
+            bitmap = bitmapdefault;
             return bitmap;
         }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null) {
-                holder.icon.setImageBitmap(result);
-            }
-            holder.progressBar.setVisibility(View.GONE);
-        }
     }
+    //Funciones auxiliares
+    private static byte[] getBytes(Bitmap bitmap) {
+        byte[] image = new byte[0];
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
+            image = stream.toByteArray();
+        }catch (OutOfMemoryError e){
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    private static Bitmap getImage(byte[] image){
+        Bitmap b=null;
+        try{
+            b=BitmapFactory.decodeByteArray(image, 0, image.length);
+        }catch (OutOfMemoryError e){
+            e.printStackTrace();
+        }
+        return b;
+    }
+    private String setTime(long time) {
+        int one_hr=1000*60*60;
+        Date now =new Date();
+        Date before = new Date(time);
+        long diff = now.getTime()- before.getTime();
+        long hs= diff/one_hr;
+        SimpleDateFormat sdf = new SimpleDateFormat("K");
+        String formatt = sdf.format(new Date(hs));
+        return formatt + " h";
+    }
+
 }

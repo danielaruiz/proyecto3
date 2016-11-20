@@ -47,8 +47,9 @@ public class DBAdapter {
                         + RedditDb.RedditEntry.TITLE + " TEXT,"
                         + RedditDb.RedditEntry.SUBREDDIT + " TEXT,"
                         + RedditDb.RedditEntry.COMMENTS + " TEXT,"
-                        + RedditDb.RedditEntry.CREATED + " TEXT,"
+                        + RedditDb.RedditEntry.CREATED + " INTEGER,"
                         + RedditDb.RedditEntry.URL + " TEXT,"
+                        + RedditDb.RedditEntry.THUMBNAIL + " TEXT,"
                         + RedditDb.RedditEntry.ICON + " BLOB,"
                         + "UNIQUE (" + RedditDb.RedditEntry.ID + "))");
             } catch (SQLException e) {
@@ -96,7 +97,6 @@ public class DBAdapter {
 
     public  void updateimage(PostModel postModel) {
         if(!db.isOpen()){open();}
-        System.out.println("UpdateImage");
         ContentValues values = new ContentValues();
         values.put(RedditDb.RedditEntry.ICON, postModel.getIcon());
         db.update(RedditDb.RedditEntry.TABLE_NAME, values, RedditDb.RedditEntry.ID + "=" + postModel.getId(),null);
@@ -118,8 +118,9 @@ public class DBAdapter {
                     postModel.setTitle(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.TITLE)));
                     postModel.setSubreddit(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.SUBREDDIT)));
                     postModel.setComments(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.COMMENTS))));
-                    postModel.setCreated(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.CREATED))));
+                    postModel.setCreated(cursor.getLong(cursor.getColumnIndex(RedditDb.RedditEntry.CREATED)));
                     postModel.setUrl(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.URL)));
+                    postModel.setThumbnail(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.THUMBNAIL)));
                     byte[] image = cursor.getBlob(cursor.getColumnIndex(RedditDb.RedditEntry.ICON));
                     if (image != null) {
                         postModel.setIcon(image);
@@ -129,9 +130,8 @@ public class DBAdapter {
                 cursor.close();
             }
         }catch (IllegalStateException e){
-                e.printStackTrace();
+            e.printStackTrace();
         }
         return list;
     }
-
 }

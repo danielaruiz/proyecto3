@@ -15,8 +15,12 @@
         completions."
     </string>
 
-    <string name="title_activity_news">"Activity News"
-    </string>
-
+    <string name="title_activity_news">"Activity News"</string>
+    <!--seccion listview row-->
+    <string name="created">"Time"</string>
+    <string name="title">"Title of the news"</string>
+    <string name="comments">"Number of comments"</string>
+    <string name="subreddit">"Subreddit"</string>
+    <string name="author">"Author of the news"</string>
 
 </resources>

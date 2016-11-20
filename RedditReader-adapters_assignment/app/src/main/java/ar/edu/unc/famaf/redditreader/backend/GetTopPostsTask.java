@@ -3,6 +3,7 @@ package ar.edu.unc.famaf.redditreader.backend;
 
 import android.os.AsyncTask;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -34,11 +35,14 @@ public class GetTopPostsTask extends AsyncTask<String, Integer,Listing> {
         HttpURLConnection hcon;
         try {
             hcon=(HttpURLConnection)new URL(url).openConnection();
-            hcon.setReadTimeout(30000); // Timeout at 30 seconds
+            //hcon.setReadTimeout(30000); // Timeout at 30 seconds
             //hcon.setRequestProperty("User-Agent", "Alien V1.0");
             hcon.setRequestMethod("GET");
-                Parser list = new Parser();
-                return list.readJsonStream(hcon.getInputStream());
+            Parser list = new Parser();
+            InputStream input=hcon.getInputStream();
+            if (input!= null) {
+                return list.readJsonStream(input);
+            }
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -46,7 +50,7 @@ public class GetTopPostsTask extends AsyncTask<String, Integer,Listing> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return new Listing();
 
     }
 
@@ -55,7 +59,4 @@ public class GetTopPostsTask extends AsyncTask<String, Integer,Listing> {
     protected void onPostExecute(Listing input) {
         super.onPostExecute(input);
     }
-
-
-
 }
