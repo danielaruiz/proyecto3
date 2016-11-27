@@ -30,7 +30,6 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
  * A placeholder fragment containing a simple view.
  */
 public class NewsActivityFragment extends Fragment {
-//    PostModel postModel=null;
     OnPostItemSelectedListener listener;
     PostAdapter adapter;
 
@@ -70,7 +69,6 @@ public class NewsActivityFragment extends Fragment {
                     list.addAll(lst);
                     adapter.notifyDataSetChanged();
                 }else{
-                    System.out.println("LISTA VACIA");
                     Toast.makeText(getActivity(), "Error loading list. Try again",
                             Toast.LENGTH_LONG).show();
                 }

@@ -135,39 +135,3 @@ public class Parser {
     }
 
 }
-
-
-//            if (name.equals("title")) {
-//                post.setTitle(reader.nextString());
-//            } else if (name.equals("subreddit")) {
-//                post.setSubreddit(reader.nextString());
-//            } else if (name.equals("created") ) {
-//                post.setCreated(reader.nextInt());
-//            } else if (name.equals("author")) {
-//                post.setAuthor(reader.nextString());
-//
-//            } else if (name.equals("url")) {
-//                post.setUrl(reader.nextString());
-//
-//            }else if(name.equals("num_comments")){
-//                post.setComments(reader.nextInt());
-//            } else {
-//                reader.skipValue();
-//            }
-
-//switch (name){
-//        case "children":
-//        list = readChildren(reader);
-//        break;
-//        case "after":
-//        after=reader.nextString();
-//        break;
-//        case "before":
-//        if(reader.peek()!= JsonToken.NULL){
-//        before=reader.nextString();
-//        }
-//        break;
-//default:
-//        reader.skipValue();
-//        break;
-//        }

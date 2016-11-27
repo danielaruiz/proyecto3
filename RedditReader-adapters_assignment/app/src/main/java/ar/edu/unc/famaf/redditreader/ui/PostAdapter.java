@@ -34,13 +34,12 @@ import ar.edu.unc.famaf.redditreader.backend.DBAdapter;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 
- public class PostAdapter extends ArrayAdapter {
+public class PostAdapter extends ArrayAdapter {
     private Context context;
     private int layoutResourceId;
     private List<PostModel> mListPostModel;
     private DBAdapter db;
     private boolean mbusy;
-    private Bitmap bitmapdefault;
 
     public PostAdapter(Context context, int resource, List<PostModel> list, DBAdapter db, boolean mBusy) {
         super(context, resource, list);
@@ -49,7 +48,6 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
         this.layoutResourceId = resource;
         this.db = db;
         this.mbusy=mBusy;
-        bitmapdefault = BitmapFactory.decodeResource(context.getResources(), R.mipmap.error);
 
     }
 
@@ -61,18 +59,75 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         View row = convertView;
+        final Bitmap bitmapdefault = BitmapFactory.decodeResource(context.getResources(), R.drawable.error);
         final PostModelHolder holder;
+
         if (row == null || !(row.getTag() instanceof PostModelHolder)) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
-            holder = new PostModelHolder().getInstance(row);
+            holder = new PostModelHolder();
+            holder.mAuthor = (TextView) row.findViewById(R.id.author);
+            holder.mCreated = (TextView) row.findViewById(R.id.created);
+            holder.mSubreddit = (TextView) row.findViewById(R.id.subreddit);
+            holder.mTitle = (TextView) row.findViewById(R.id.title);
+            holder.icon = (ImageView) row.findViewById(R.id.imageView);
+            holder.comments = (TextView) row.findViewById(R.id.comment);
+            holder.progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
+            row.setTag(holder);
         }else{
             holder = (PostModelHolder) row.getTag();
         }
+
         PostModel model = getItem(position);
-        holder.set_holder(model);
+        holder.mTitle.setText(model.getTitle());
+        holder.mSubreddit.setText(model.getSubreddit());
+        holder.mCreated.setText(setTime(model.getCreated()));
+        holder.mAuthor.setText(model.getAuthor());
+        holder.comments.setText(String.valueOf(model.getComments()));
+        holder.position= position;
+
+        if (model.getIcon().length > 0) {
+            holder.icon.setImageBitmap(getImage(model.getIcon()));
+            holder.progressBar.setVisibility(View.GONE);
+            return row;
+        }
+        //caso contrario descargamos imagen si existe url
+        if (model.getThumbnail() != null && !mbusy && !model.isDownload()) {
+            try {
+                URL urlArray = new URL(model.getThumbnail());
+                //Descargando imagen
+                new DownloadImageTask(model){
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+                        holder.progressBar.setVisibility(View.VISIBLE);
+                        model.setDownload(true);
+                    }
+                    @Override
+                    protected void onPostExecute(Bitmap result) {
+                        super.onPostExecute(result);
+                        if(holder.position==position ){
+                            if(result== null){
+                                result= bitmapdefault;
+                            }
+                            holder.icon.setImageBitmap(result);
+                            holder.progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                }.execute(urlArray);
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                holder.icon.setImageBitmap(bitmapdefault);
+                holder.progressBar.setVisibility(View.GONE);
+            }
+
+        } else if (model.getThumbnail()==null){
+            holder.icon.setImageBitmap(bitmapdefault);
+            holder.progressBar.setVisibility(View.GONE);
+        }
         return row;
     }
 
@@ -84,59 +139,7 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
         ImageView icon;
         TextView comments;
         ProgressBar progressBar;
-
-
-        public PostModelHolder getInstance (View row){
-            mAuthor = (TextView) row.findViewById(R.id.author);
-            mCreated = (TextView) row.findViewById(R.id.created);
-            mSubreddit = (TextView) row.findViewById(R.id.subreddit);
-            mTitle = (TextView) row.findViewById(R.id.title);
-            icon = (ImageView) row.findViewById(R.id.imageView);
-            comments = (TextView) row.findViewById(R.id.comment);
-            progressBar = (ProgressBar) row.findViewById(R.id.progressBar);
-            row.setTag(this);
-            return this;
-        }
-
-        public PostModelHolder set_holder(PostModel model){
-            mTitle.setText(model.getTitle());
-            mSubreddit.setText(model.getSubreddit());
-            mCreated.setText(setTime(model.getCreated()));
-            mAuthor.setText(model.getAuthor());
-            comments.setText(String.valueOf(model.getComments()));
-
-            if (model.getIcon().length > 0) {
-                icon.setImageBitmap(getImage(model.getIcon()));
-                progressBar.setVisibility(View.GONE);
-
-            } else if (model.getThumbnail() != null && !mbusy && !model.isDownload()) {
-                try {
-                    URL urlArray = new URL(model.getThumbnail());
-                    new DownloadImageTask(model){
-                        @Override
-                        protected void onPreExecute() {
-                            super.onPreExecute();
-                            progressBar.setVisibility(View.VISIBLE);
-                            model.setDownload(true);
-                        }
-                        @Override
-                        protected void onPostExecute(Bitmap result) {
-                            super.onPostExecute(result);
-                            icon.setImageBitmap(result);
-                            progressBar.setVisibility(View.GONE);
-                        }
-                    }.execute(urlArray);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                    icon.setImageBitmap(bitmapdefault);
-                    progressBar.setVisibility(View.GONE);
-                }
-            } else{
-                icon.setImageBitmap(bitmapdefault);
-                progressBar.setVisibility(View.GONE);
-            }
-            return this;
-        }
+        int position;
     }
 
     private class DownloadImageTask extends AsyncTask<URL, Integer, Bitmap> {
@@ -147,7 +150,6 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
         }
         protected Bitmap doInBackground(URL... urls) {
             URL url = urls[0];
-            //System.out.println(url);
             Bitmap bitmap = null;
             try {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -159,13 +161,11 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
             if(bitmap!=null){
                 model.setIcon(getBytes(bitmap));
                 db.updateimage(model);
-                return bitmap;
             }
-
-            bitmap = bitmapdefault;
             return bitmap;
         }
     }
+    //Funciones auxiliares
     private static byte[] getBytes(Bitmap bitmap) {
         byte[] image = new byte[0];
         try {
@@ -188,7 +188,7 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
         return b;
     }
     private String setTime(long time) {
-       int one_hr=1000*60*60;
+        int one_hr=1000*60*60;
         Date now =new Date();
         Date before = new Date(time);
         long diff = now.getTime()- before.getTime();

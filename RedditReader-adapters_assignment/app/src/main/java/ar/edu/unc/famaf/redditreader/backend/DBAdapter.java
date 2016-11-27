@@ -12,22 +12,16 @@ import java.util.List;
 
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
-/**
- * Created by dvr on 11/11/16.
- */
+
 
 public class DBAdapter {
-    private final Context context;
     private DatabaseHelper DBHelper;
     private SQLiteDatabase db;
-    private int offset;
     private  int totalItemsCount;
 
     public DBAdapter(Context ctx, int totalItemsCount) {
-        this.context = ctx;
-        this.DBHelper = new DatabaseHelper(context);
+        this.DBHelper = new DatabaseHelper(ctx);
         this.totalItemsCount= totalItemsCount;
-
     }
 
     private class DatabaseHelper extends SQLiteOpenHelper {
@@ -59,7 +53,6 @@ public class DBAdapter {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            System.out.println("upgrade table");
             db.execSQL("DROP TABLE IF EXISTS " + RedditDb.RedditEntry.TABLE_NAME);
             onCreate(db);
         }
@@ -81,6 +74,7 @@ public class DBAdapter {
 
     public DBAdapter savePostModel(List<PostModel> list) {
         db = DBHelper.getWritableDatabase();
+
         for(int i=0; i<list.size(); i++){
             db.insert(RedditDb.RedditEntry.TABLE_NAME, null,  list.get(i).toContentValues());
             /*Guardo el id en el postmodel*/
@@ -105,9 +99,8 @@ public class DBAdapter {
 
     public List<PostModel> getAllDb(){
         List<PostModel> list = new ArrayList<PostModel>();
-        offset=totalItemsCount;
-        System.out.println("Recuperando datos de la base offset...................." + this.offset);
-        String selectQuery2 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " LIMIT 5 OFFSET "+ String.valueOf(this.offset);
+        int offset=totalItemsCount;
+        String selectQuery2 = "SELECT  * FROM " + RedditDb.RedditEntry.TABLE_NAME + " LIMIT 5 OFFSET "+ String.valueOf(offset);
         try {
             Cursor cursor = db.rawQuery(selectQuery2, null);
             if(cursor.moveToFirst()) {

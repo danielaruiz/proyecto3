@@ -6,7 +6,10 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.io.Serializable;
+
 import ar.edu.unc.famaf.redditreader.R;
+import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 public class NewsDetailActivity extends AppCompatActivity implements NewsDetailActivityFragment.OnFragmentInteractionListener {
     static final int REQUEST =0;
@@ -18,12 +21,14 @@ public class NewsDetailActivity extends AppCompatActivity implements NewsDetailA
             if (savedInstanceState != null) {
                 return;
             }
-            String s1=getIntent().getExtras().getString("titulo");
-            String s2=getIntent().getExtras().getString("autor");
-            String s3=getIntent().getExtras().getString("creado");
-            String s4=getIntent().getExtras().getString("subreddit");
-            byte[] s5=getIntent().getByteArrayExtra("preview");
-            String s6=getIntent().getExtras().getString("url");
+            PostModel post = (PostModel) getIntent().getSerializableExtra("post");
+
+            String s1= post.getTitle();
+            String s2=post.getAuthor();
+            String s3=String.valueOf(post.getCreated());
+            String s4=post.getSubreddit();
+            byte[] s5=post.getIcon();
+            String s6=post.getUrl();
 
             NewsDetailActivityFragment fragment =
                     NewsDetailActivityFragment.newInstance(s1, s2, s3, s4, s5, s6);

@@ -48,12 +48,7 @@ public class NewsActivity extends AppCompatActivity implements OnPostItemSelecte
         Context context= getApplicationContext();
         if(post!=null) {
             Intent intent = new Intent(context, NewsDetailActivity.class);
-            intent.putExtra("subreddit", post.getSubreddit());
-            intent.putExtra("creado", String.valueOf(post.getCreated()));
-            intent.putExtra("titulo", post.getTitle());
-            intent.putExtra("autor", post.getAuthor());
-            intent.putExtra("preview",post.getIcon());
-            intent.putExtra("url", post.getUrl());
+            intent.putExtra("post",post);
             startActivityForResult(intent, REQUEST);
         }
     }
@@ -61,13 +56,6 @@ public class NewsActivity extends AppCompatActivity implements OnPostItemSelecte
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
-//        if (requestCode == REQUEST){}
-//        +            if (resultCode == RESULT_OK) {
-//        +                String usuario = data.getExtras().getString("user");
-//        +                TextView textView = (TextView) findViewById(R.id.loginStatusTextView);
-//        +                textView.setText(usuario);
-//        +            }
-//        +        }
     }
 
 }
