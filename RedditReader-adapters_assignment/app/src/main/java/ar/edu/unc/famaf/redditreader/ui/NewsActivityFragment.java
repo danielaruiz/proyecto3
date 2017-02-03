@@ -29,9 +29,24 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class NewsActivityFragment extends Fragment {
+public class NewsActivityFragment extends Fragment{
     OnPostItemSelectedListener listener;
     PostAdapter adapter;
+    public static DBAdapter db;
+    List<PostModel> list;
+
+    public NewsActivityFragment () {
+        // Required empty public constructor
+    }
+
+    public static NewsActivityFragment newInstance() {
+        
+        Bundle args = new Bundle();
+        
+        NewsActivityFragment fragment = new NewsActivityFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -46,23 +61,31 @@ public class NewsActivityFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu (true);
+        setRetainInstance(true);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
 
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View context = inflater.inflate(R.layout.fragment_news, container, false);
-        final List<PostModel> list= new ArrayList<>();
+        list= new ArrayList<>();
         final Backend backend = Backend.getInstance();
         final boolean[] mBusy = new boolean[1];
         final ListView lv = (ListView) context.findViewById(R.id.list);
-
         backend.getTopPosts(0,getContext(), new TopPostIterator() {
             @Override
-            public void nextPosts(List<PostModel> lst, DBAdapter db) {
-                adapter = new PostAdapter(getActivity(), R.layout.listview_row, list, db, mBusy[0]);
+            public void nextPosts(List<PostModel> lst, DBAdapter dbase) {
+                db=dbase;
+                adapter = new PostAdapter(getActivity(), R.layout.listview_row, list, dbase, mBusy[0]);
                 lv.setAdapter(adapter);
 
                 if(lst.size()!=0){
@@ -80,7 +103,7 @@ public class NewsActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PostModel postModel = list.get(position);
                 if (postModel!=null){
-                    listener.onPostItemPicked(postModel);
+                    listener.onPostItemPicked(postModel, position);
                 }
             }
         });
@@ -88,8 +111,6 @@ public class NewsActivityFragment extends Fragment {
         lv.setOnScrollListener(new EndlessScrollListener() {
             @Override
             public boolean onLoadMore(int page, int totalItemsCount) {
-                System.out.println("page"+page);
-                System.out.println(totalItemsCount);
                 backend.getTopPosts(totalItemsCount, getContext(), new TopPostIterator() {
                     @Override
                     public void nextPosts(List<PostModel> lst, DBAdapter db) {
@@ -103,7 +124,10 @@ public class NewsActivityFragment extends Fragment {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 super.onScrollStateChanged(view, scrollState);
+                System.out.println(scrollState);
+
                 switch (scrollState) {
+
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
                         mBusy[0] = false;
                         adapter.notifyDataSetChanged();
@@ -114,13 +138,29 @@ public class NewsActivityFragment extends Fragment {
                     case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
                         mBusy[0] = true;
                         break;
-
                 }
             }
-
         });
-
         return  context;
+    }
+
+    public  void  changeList(PostModel postModel, int position){
+        list.set(position, postModel);
+        adapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //guardar info
+        //Bundle args = new Bundle();
+        //setArguments(args);
     }
 
 
@@ -129,5 +169,4 @@ public class NewsActivityFragment extends Fragment {
         super.onDetach();
         listener=null;
     }
-
 }

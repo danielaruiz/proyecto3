@@ -124,6 +124,12 @@ public class Parser {
                 case "thumbnail":
                     post.setThumbnail(reader.nextString());
                     break;
+                case "score":
+                    post.setScore(reader.nextInt());
+                    break;
+                case "name":
+                    post.setName(reader.nextString());
+                    break;
                 default:
                     reader.skipValue();
                     break;

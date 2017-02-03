@@ -3,15 +3,15 @@ package ar.edu.unc.famaf.redditreader.ui;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import ar.edu.unc.famaf.redditreader.R;
@@ -26,46 +26,20 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
  * create an instance of this fragment.
  */
 public class NewsDetailActivityFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final String ARG_PARAM3 = "param3";
-    private static final String ARG_PARAM4 = "param4";
-    private static final String ARG_PARAM5 = "param5";
-    private static final String ARG_PARAM6 = "param6";
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-    private String mParam3;
-    private String mParam4;
-    private byte[] mParam5;
-    private String mParam6;
+    private PostModel postModel;
+    private int clicks=0;
     private OnFragmentInteractionListener mListener;
 
     public NewsDetailActivityFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment NewsDetailActivityFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static NewsDetailActivityFragment newInstance(String param1, String param2,
-                                    String param3, String param4, byte[] param5, String param6) {
+
+    public static NewsDetailActivityFragment newInstance(PostModel post) {
+
         NewsDetailActivityFragment fragment = new NewsDetailActivityFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        args.putString(ARG_PARAM3, param3);
-        args.putString(ARG_PARAM4, param4);
-        args.putByteArray(ARG_PARAM5, param5);
-        args.putString(ARG_PARAM6, param6);
+        args.putSerializable("post", post);
         fragment.setArguments(args);
         return fragment;
     }
@@ -74,42 +48,84 @@ public class NewsDetailActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);//titulo
-            mParam2 = getArguments().getString(ARG_PARAM2);//autor
-            mParam3 = getArguments().getString(ARG_PARAM3);//creado
-            mParam4 = getArguments().getString(ARG_PARAM4);//subreddit
-            mParam5 = getArguments().getByteArray(ARG_PARAM5);//preview
-            mParam6 = getArguments().getString(ARG_PARAM6);//url
+            postModel = (PostModel) getArguments().getSerializable("post");
         }
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        int score= postModel.getScore();
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_news_detail_activity, container, false);
+
         TextView text1 = (TextView) view.findViewById(R.id.textView5 );
-        text1.setText(mParam3);
+        text1.setText(String.valueOf(postModel.getCreated()));
+
         TextView text2 = (TextView) view.findViewById(R.id.textView6);
-        text2.setText(mParam2);
+        text2.setText(postModel.getAuthor());
+
         TextView text3 = (TextView) view.findViewById(R.id.textView7);
-        text3.setText(mParam4);
+        text3.setText(postModel.getSubreddit());
+
         TextView text4 = (TextView) view.findViewById(R.id.textView);
-        text4.setText(mParam1);
+        text4.setText(postModel.getTitle());
+
         TextView text5 = (TextView) view.findViewById(R.id.textView3);
-        text5.setText(mParam6);
+        text5.setText(postModel.getUrl());
         text5.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Uri myUri = Uri.parse(mParam6);
-                mListener.onFragmentInteraction(myUri);
+                Uri myUri = Uri.parse(postModel.getUrl());
+                mListener.onFragmentInteraction(myUri, null);
             }
         });
 
-
         ImageView image = (ImageView) view.findViewById(R.id.imageView4);
-        image.setImageBitmap(getImage(mParam5));
+        image.setImageBitmap(getImage(postModel.getIcon()));
+
+        //Parte nueva
+        PostModelHolder holder = new PostModelHolder();
+        holder.score=(TextView) view.findViewById(R.id.scoredetail);
+        holder.score.setText(String.valueOf(postModel.getScore()));
+
+        holder.up = (ImageButton) view.findViewById(R.id. upDetail);
+        holder.down = (ImageButton) view.findViewById(R.id.downDetail);
+
+        if(NewsActivity.LOGGIN && postModel.getClickup() == 1){
+            holder.up.setBackgroundColor(Color.DKGRAY);
+            score=postModel.getScore()-1;
+        }
+        if(NewsActivity.LOGGIN && postModel.getClickdown() == 1){
+            holder.down.setBackgroundColor(Color.DKGRAY);
+            score=postModel.getScore()+1;
+        }
+
+        final Buttons button = new Buttons(postModel,holder, NewsActivityFragment.db   , view.getContext(), clicks, score);
+
+        holder.up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                button.Bcontrol("1");
+                if(NewsActivity.LOGGIN) {
+                    mListener.onFragmentInteraction(null, postModel);
+                }
+            }
+        });
+
+        holder.down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                button.Bcontrol("-1");
+                if(NewsActivity.LOGGIN){
+                    mListener.onFragmentInteraction(null, postModel);
+                }
+            }
+        });
+
         return view;
     }
     public static Bitmap getImage(byte[] image){
@@ -125,7 +141,7 @@ public class NewsDetailActivityFragment extends Fragment {
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(uri, null); ///agrgar model
         }
     }
 
@@ -139,6 +155,7 @@ public class NewsDetailActivityFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
 
     @Override
     public void onDetach() {
@@ -158,6 +175,7 @@ public class NewsDetailActivityFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(Uri uri, PostModel post);
     }
+
 }

@@ -21,6 +21,51 @@ public class PostModel implements Serializable {
     private String url;
     private int comments;
     private boolean download=false;
+    private int score;
+    private  String name;
+    private int clickup=0;
+    private int clickdown=0;
+
+    public int getClickup() {
+        return clickup;
+    }
+
+    public void setClickup(int click) {
+        this.clickup = click;
+    }
+
+    public int getClickdown() {
+        return clickdown;
+    }
+
+    public void setClickdown(int click) {
+        this.clickdown = click;
+    }
+    //    private  String vote="none";
+//
+//    public String getVote() {
+//        return vote;
+//    }
+//
+//    public void setVote(String vote) {
+//        this.vote = vote;
+//    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     public String getThumbnail() {
         return thumbnail;
@@ -112,11 +157,16 @@ public class PostModel implements Serializable {
         values.put(RedditDb.RedditEntry.CREATED, mCreated);
         values.put(RedditDb.RedditEntry.TITLE, mTitle);
         values.put(RedditDb.RedditEntry.COMMENTS,comments);
+        values.put(RedditDb.RedditEntry.SCORE, score);
         values.put(RedditDb.RedditEntry.URL, url);
         values.put(RedditDb.RedditEntry.THUMBNAIL, thumbnail);
         if (this.icon.length >0 ){
             values.put(RedditDb.RedditEntry.ICON, icon);
         }
+        values.put(RedditDb.RedditEntry.NAME,name);
+//        values.put(RedditDb.RedditEntry.CLICKUP,clickup);
+//        values.put(RedditDb.RedditEntry.CLICDOWN, clickdown);
+//        values.put(RedditDb.RedditEntry.VOTE, vote);
         return  values;
     }
 }

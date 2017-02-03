@@ -41,10 +41,15 @@ public class DBAdapter {
                         + RedditDb.RedditEntry.TITLE + " TEXT,"
                         + RedditDb.RedditEntry.SUBREDDIT + " TEXT,"
                         + RedditDb.RedditEntry.COMMENTS + " TEXT,"
+                        + RedditDb.RedditEntry.SCORE + " TEXT,"
                         + RedditDb.RedditEntry.CREATED + " INTEGER,"
                         + RedditDb.RedditEntry.URL + " TEXT,"
                         + RedditDb.RedditEntry.THUMBNAIL + " TEXT,"
                         + RedditDb.RedditEntry.ICON + " BLOB,"
+                        + RedditDb.RedditEntry.NAME + " TEXT,"
+//                        + RedditDb.RedditEntry.CLICKUP+ " INTEGER,"
+//                        + RedditDb.RedditEntry.CLICDOWN + " INTEGER,"
+
                         + "UNIQUE (" + RedditDb.RedditEntry.ID + "))");
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -88,6 +93,23 @@ public class DBAdapter {
         }
         return this;
     }
+    public  void updateScore(PostModel postModel){
+        if(!db.isOpen()){open();}
+        ContentValues values = new ContentValues();
+        values.put(RedditDb.RedditEntry.SCORE, postModel.getScore());
+        db.update(RedditDb.RedditEntry.TABLE_NAME, values, RedditDb.RedditEntry.ID + "=" + postModel.getId(),null);
+        close();
+    }
+
+//    public  void updateClicks(PostModel postModel){
+//        if(!db.isOpen()){open();}
+//        ContentValues values = new ContentValues();
+//        values.put(RedditDb.RedditEntry.CLICKUP, postModel.getClickup());
+//        values.put(RedditDb.RedditEntry.CLICDOWN, postModel.getClickdown());
+//        db.update(RedditDb.RedditEntry.TABLE_NAME, values, RedditDb.RedditEntry.ID + "=" + postModel.getId(),null);
+//        close();
+//    }
+
 
     public  void updateimage(PostModel postModel) {
         if(!db.isOpen()){open();}
@@ -111,6 +133,7 @@ public class DBAdapter {
                     postModel.setTitle(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.TITLE)));
                     postModel.setSubreddit(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.SUBREDDIT)));
                     postModel.setComments(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.COMMENTS))));
+                    postModel.setScore(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.SCORE))));
                     postModel.setCreated(cursor.getLong(cursor.getColumnIndex(RedditDb.RedditEntry.CREATED)));
                     postModel.setUrl(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.URL)));
                     postModel.setThumbnail(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.THUMBNAIL)));
@@ -118,12 +141,16 @@ public class DBAdapter {
                     if (image != null) {
                         postModel.setIcon(image);
                     }
+                    postModel.setName(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.NAME)));
+//                    postModel.setClickup(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.CLICKUP))));
+//                    postModel.setClickdown(Integer.parseInt(cursor.getString(cursor.getColumnIndex(RedditDb.RedditEntry.CLICDOWN))));
+
                     list.add(postModel);
                 } while (cursor.moveToNext());
                 cursor.close();
             }
         }catch (IllegalStateException e){
-                e.printStackTrace();
+            e.printStackTrace();
         }
         return list;
     }

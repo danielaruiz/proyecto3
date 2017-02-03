@@ -39,6 +39,7 @@ public abstract class EndlessScrollListener implements AbsListView.OnScrollListe
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 
     {
+        System.out.println("OnScroll");
         // If the total item count is zero and the previous isn't, assume the
         // list is invalidated and should be reset back to initial state
 //        System.out.println(firstVisibleItem);

@@ -1,5 +1,7 @@
 package ar.edu.unc.famaf.redditreader.ui;
 
+import java.util.List;
+
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 /**
@@ -8,5 +10,5 @@ import ar.edu.unc.famaf.redditreader.model.PostModel;
 
 public interface OnPostItemSelectedListener {
 
-    void onPostItemPicked(PostModel post);
+    void onPostItemPicked(PostModel post, int position);
 }
