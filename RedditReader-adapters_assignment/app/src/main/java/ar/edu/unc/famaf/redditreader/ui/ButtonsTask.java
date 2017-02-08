@@ -1,9 +1,6 @@
 package ar.edu.unc.famaf.redditreader.ui;
 
 import android.os.AsyncTask;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,11 +18,6 @@ public class ButtonsTask extends AsyncTask<String, Integer,Boolean> {
     public ButtonsTask(String name){
         this.name = name;
 
-    }
-
-    @Override
-    protected void onPreExecute() { //REcibe dir
-        super.onPreExecute();
     }
 
     @Override
@@ -90,54 +82,5 @@ public class ButtonsTask extends AsyncTask<String, Integer,Boolean> {
             e.printStackTrace();
         }
         return false;
-
-//        String dir = params[0];
-//        final Boolean[] result = {false};
-//        String authorizacion = "bearer "+ NewsActivity.accessToken;
-//        OkHttpClient client = new OkHttpClient();
-//
-//        Request request = new Request.Builder()
-//                .addHeader("User-Agent", "Reddit Reader")
-//                .addHeader("Authorization", authorizacion)
-//                .url("https://oauth.reddit.com/api/vote")
-//                .post(RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"),"dir="+dir+"&id="+name+"&rank=3"))
-//                .build();
-//
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                System.out.println("onfail");
-//                String TAG = "MyActivity";
-//                Log.e(TAG, "ERROR: " + e);
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                String json = response.body().string();
-//                System.out.println(json);
-//                JSONObject data = null;
-//                try {
-//                    data = new JSONObject(json);
-//                    String error= data.optString("error");
-//                    if (error.equals("401")){
-//                        System.out.println("Unauthorized");
-//                        NewsActivity.LOGGIN =false;
-//                    }else{
-//                        System.out.println("okkkkkk");
-//                        result[0]=true;
-//                    }
-//                } catch (JSONException e) {
-//                    System.out.println("catch");
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//        return result[0];
-
-    }
-
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
     }
 }

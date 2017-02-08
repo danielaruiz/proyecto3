@@ -10,10 +10,6 @@ import android.widget.Toast;
 import ar.edu.unc.famaf.redditreader.backend.DBAdapter;
 import ar.edu.unc.famaf.redditreader.model.PostModel;
 
-/**
- * Created by dvr on 20/01/17.
- */
-
 public class Buttons {
     PostModel model;
     PostModelHolder holder;
@@ -110,48 +106,3 @@ public class Buttons {
         return model;
     }
 }
-
-//    private boolean vote( String name, String dir){
-//        final Boolean[] result = {true};
-//        String authorizacion = "bearer "+ NewsActivity.accessToken;
-//        OkHttpClient client = new OkHttpClient();
-//        Request request = new Request.Builder()
-//                .addHeader("User-Agent", "Reddit Reader")
-//                .addHeader("Authorization", authorizacion)
-//                .url("https://oauth.reddit.com/api/vote")
-//                .post(RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"),"dir="+dir+"&id="+name+"&rank=3"))
-//                .build();
-//
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                System.out.println("onfail");
-//                String TAG = "MyActivity";
-//                Log.e(TAG, "ERROR: " + e);
-//                result[0] =false;
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                String json = response.body().string();
-//                System.out.println(json);
-//                JSONObject data = null;
-//                try {
-//                    data = new JSONObject(json);
-//                    String error= data.optString("error");
-//                    if (error.equals("401")){
-//                        System.out.println("Unauthorized");
-//                        result[0] =false;
-//                    }else{
-//                        System.out.println("okkkkkk");
-//                    }
-//                } catch (JSONException e) {
-//                    System.out.println("catch");
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//        return result[0];
-//    }
-//}
-

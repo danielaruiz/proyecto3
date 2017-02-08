@@ -124,7 +124,6 @@ public class NewsActivityFragment extends Fragment{
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 super.onScrollStateChanged(view, scrollState);
-                System.out.println(scrollState);
 
                 switch (scrollState) {
 
